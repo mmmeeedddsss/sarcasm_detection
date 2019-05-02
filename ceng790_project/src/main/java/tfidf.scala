@@ -85,54 +85,5 @@ object tfidf {
         val predictionsDF = model.transform(testDF)
 
         println("On test data : " + evaluator.evaluate(predictionsDF))
-
-        /*
-
-        // PART 1
-        val featureAssembler = new VectorAssembler()
-            .setInputCols( creditDF.columns.filter( c => c != "creditability" ) )
-            .setOutputCol("features")
-
-        // PART 2
-        val stringIndexer = new StringIndexer()
-            .setInputCol("creditability")
-            .setOutputCol("label")
-
-        // PART 4
-        val randomForestC = new RandomForestClassifier()
-            .setLabelCol("label")
-            .setFeaturesCol("features")
-            .setSeed(1234)
-            .setFeatureSubsetStrategy("auto")
-
-        // PART 5
-        val mlPipeline = new Pipeline()
-            .setStages(Array(featureAssembler, stringIndexer, randomForestC))
-
-        val evaluator = new BinaryClassificationEvaluator()
-
-        // ParamGrid For training the model with different param sets
-        val paramGrid = new ParamGridBuilder()
-            .addGrid(randomForestC.maxDepth, Array(4, 6, 8))
-            .addGrid(randomForestC.maxBins, Array(25, 28, 31))
-            .addGrid(randomForestC.impurity, Array("entropy", "gini"))
-            .build()
-
-        val trainValidationSplit = new TrainValidationSplit()
-            .setEstimator(mlPipeline)
-            .setEvaluator(evaluator)
-            .setEstimatorParamMaps(paramGrid)
-            .setTrainRatio(0.75)
-
-        // Part 6
-        val model = trainValidationSplit.fit(trainDF)
-
-        model.getEstimatorParamMaps
-            .zip(model.validationMetrics).foreach( t => println(t) )
-
-        val predictionsDF = model.transform(testDF)
-
-        println("On test data : " + evaluator.evaluate(predictionsDF))
-        */
     }
 }
