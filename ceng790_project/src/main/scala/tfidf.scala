@@ -7,7 +7,9 @@ import org.apache.spark.sql.Dataset
 
 object tfidf extends ml_algorithm {
 
-    def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, TrainValidationSplitModel) = {
+    def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
+
+        println("TF-IDF")
 
         val indexer = new StringIndexer()
             .setInputCol("label")
@@ -49,12 +51,11 @@ object tfidf extends ml_algorithm {
             .setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
-
         println( "Best score on validation set " + model.validationMetrics.max )
 
         model.getEstimatorParamMaps
             .zip(model.validationMetrics).foreach( t => println(t) )
 
-        (model.validationMetrics.max, model)
+        (model.validationMetrics.max, "tf-idf", model)
     }
 }

@@ -30,16 +30,16 @@ object entry_point {
 
 
 
-        // More algortihms will be called here
-        val tfidf_pair = tfidf.fit(trainDF, trainValidationSplitRatio)
-
+        // More algortihms will be added here
+        val trained_model_tuples = Array(
+            tfidf.fit(trainDF, trainValidationSplitRatio)
+        )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here
-        val predictionsDF = tfidf_pair._2.transform(testDF)
+        val best_model = trained_model_tuples.maxBy( m => m._1 )
+        val predictionsDF = best_model._3.transform(testDF)
 
         val evaluator = new BinaryClassificationEvaluator()
-        println("On test data : " + evaluator.evaluate(predictionsDF))
-
-        trainDF.show()
+        println("Best model %s on test data : %f".format(best_model._2, evaluator.evaluate(predictionsDF)))
     }
 }
