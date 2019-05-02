@@ -1,42 +1,13 @@
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{LogisticRegression, RandomForestClassifier}
+import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.feature._
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
+import org.apache.spark.sql.Dataset
 
-object tfidf {
+object tfidf extends ml_algorithm {
 
-    // define the Credit Schema
-    case class Comment(
-        label: Int, comment: String, author: String, subreddit: String, score: Int,
-        ups: Int, downs: Int, date: String, created_utc: String, parent_comment: String
-     )
-
-    def main(args: Array[String]) {
-
-        val spark = SparkSession.builder.appName("Spark SQL").config("spark.master", "local[*]").getOrCreate()
-        val sc = spark.sparkContext
-        val sqlContext = spark.sqlContext
-        import sqlContext.implicits._
-        val schema = ScalaReflection.schemaFor[Comment].dataType.asInstanceOf[StructType]
-        val commentsDF = spark.read
-            .option("header", false)
-            .option("delimiter", "\t")
-            .schema(schema)
-            .csv("train-balanced-sarc.csv").as[Comment].filter( c => c.comment != null && c.comment != "" )
-
-        val commentsRdd = commentsDF.rdd
-        commentsDF.printSchema()
-        commentsDF.show()
-
-        // PART 3
-        val dividedDatasets = commentsDF.randomSplit( Array(0.8, 0.2), seed = 1234 )
-        val trainDF = dividedDatasets(0).cache()
-        val testDF = dividedDatasets(1).cache()
+    def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, TrainValidationSplitModel) = {
 
         val indexer = new StringIndexer()
             .setInputCol("label")
@@ -68,22 +39,22 @@ object tfidf {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.elasticNetParam, Array(0.4, 0.6, 0.8, 0.9))
+            .addGrid(lr.elasticNetParam, Array(0.4, 0.6))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
             .setEstimator(mlPipeline)
             .setEvaluator(evaluator)
             .setEstimatorParamMaps(paramGrid)
-            .setTrainRatio(0.8)
+            .setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
+
+        println( "Best score on validation set " + model.validationMetrics.max )
 
         model.getEstimatorParamMaps
             .zip(model.validationMetrics).foreach( t => println(t) )
 
-        val predictionsDF = model.transform(testDF)
-
-        println("On test data : " + evaluator.evaluate(predictionsDF))
+        (model.validationMetrics.max, model)
     }
 }
