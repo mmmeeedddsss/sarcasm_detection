@@ -5,11 +5,11 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.Dataset
 
-object tfidf extends ml_algorithm {
+object word2vec extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
-        println("TF-IDF")
+        println("Word2Vec")
 
         val indexer = new StringIndexer()
             .setInputCol("label")
@@ -20,28 +20,20 @@ object tfidf extends ml_algorithm {
             .setInputCol("comment")
             .setOutputCol("words")
 
-        val vectorizer = new HashingTF()
+        val word2vec = new Word2Vec()
             .setInputCol(tokenizer.getOutputCol)
-            .setOutputCol("vectorized_comment")
-
-        val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
-            .setInputCol(vectorizer.getOutputCol)
             .setOutputCol("features")
 
-
         val lr = new LogisticRegression()
-            .setMaxIter(15)
-            //.setRegParam(0.3)
-            //.setElasticNetParam(0.8)
+            .setMaxIter(10)
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, vectorizer, idf, lr))
+            .setStages(Array(indexer, tokenizer, word2vec, lr))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.elasticNetParam, Array(0.6))
+            .addGrid( word2vec.windowSize, Array(5) )
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
@@ -56,6 +48,6 @@ object tfidf extends ml_algorithm {
         model.getEstimatorParamMaps
             .zip(model.validationMetrics).foreach( t => println(t) )
 
-        (model.validationMetrics.max, "tf-idf", model)
+        (model.validationMetrics.max, "word2vec", model)
     }
 }

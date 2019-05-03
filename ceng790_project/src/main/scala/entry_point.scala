@@ -19,7 +19,9 @@ object entry_point {
             .option("header", false)
             .option("delimiter", "\t")
             .schema(schema)
-            .csv("train-balanced-sarc.csv").as[Comment].filter( c => c.comment != null && c.comment != "" )
+            .csv("train-balanced-sarc.csv").as[Comment]
+            .filter( c => c.comment != null && c.comment != "" )
+            .map( c => helpers.text_clean(c) )
 
         commentsDF.printSchema()
         commentsDF.show()
@@ -32,7 +34,8 @@ object entry_point {
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
-            tfidf.fit(trainDF, trainValidationSplitRatio)
+            tfidf.fit(trainDF, trainValidationSplitRatio),
+            word2vec.fit(trainDF, trainValidationSplitRatio)
         )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here
