@@ -34,10 +34,10 @@ object entry_point {
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
-            //tfidf.fit(trainDF, trainValidationSplitRatio),
+            LogicticRegression.fit(trainDF, trainValidationSplitRatio)
             //word2vec.fit(trainDF, trainValidationSplitRatio),
             //NaiveBayes.fit(trainDF, trainValidationSplitRatio),
-            LinearSVC.fit(trainDF, trainValidationSplitRatio)
+            //LinearSVC.fit(trainDF, trainValidationSplitRatio)
         )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here

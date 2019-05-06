@@ -5,7 +5,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.Dataset
 
-object tfidf extends ml_algorithm {
+object LogicticRegression extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
@@ -20,6 +20,10 @@ object tfidf extends ml_algorithm {
             .setInputCol("comment")
             .setOutputCol("words")
 
+        /*val swr = new StopWordsRemover() unfortunately reduces the score
+            .setInputCol("words")
+            .setOutputCol("cleared_words")*/
+
         val vectorizer = new HashingTF()
             .setInputCol(tokenizer.getOutputCol)
             .setOutputCol("vectorized_comment")
@@ -32,7 +36,9 @@ object tfidf extends ml_algorithm {
 
         val lr = new LogisticRegression()
             .setMaxIter(15)
-            //.setRegParam(0.3)
+            .setRegParam(0.1)
+            .setLabelCol("indexedLabel")
+            .setFeaturesCol("features")
             //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
@@ -41,7 +47,7 @@ object tfidf extends ml_algorithm {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.elasticNetParam, Array(0.6))
+            //.addGrid(lr.elasticNetParam, Array(0.6))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
