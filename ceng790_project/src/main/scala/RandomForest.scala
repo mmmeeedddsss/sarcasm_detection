@@ -19,24 +19,27 @@ object RandomForest extends ml_algorithm {
 
         val tokenizer = new Tokenizer()
             .setInputCol("comment")
-            .setOutputCol("words")
+            .setOutputCol("stopWords")
 
+        val remover = new StopWordsRemover()
+          .setInputCol("stopWords")
+          .setOutputCol("words")
 
         val word2vec = new Word2Vec()
-              .setInputCol(tokenizer.getOutputCol)
+              .setInputCol(remover.getOutputCol)
               .setOutputCol("features")
 
         val rnd = new RandomForestClassifier()
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, word2vec, rnd))
+            .setStages(Array(indexer, tokenizer, remover, word2vec, rnd))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-          .addGrid(rnd.maxBins, Array(28))
-          .addGrid(rnd.maxDepth, Array(8))
-          .addGrid(rnd.numTrees, Array(30, 100))
+          .addGrid(rnd.maxBins, Array(28, 40))
+          .addGrid(rnd.maxDepth, Array(5, 12))
+          .addGrid(rnd.numTrees, Array(100))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
@@ -46,7 +49,7 @@ object RandomForest extends ml_algorithm {
             .setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
-
+        println("stop Words is used")
         println( "Best score on validation set " + model.validationMetrics.max )
 
         model.getEstimatorParamMaps.zip(model.validationMetrics).foreach(println)

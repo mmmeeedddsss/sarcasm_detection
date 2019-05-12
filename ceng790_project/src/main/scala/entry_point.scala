@@ -22,7 +22,7 @@ object entry_point {
             .schema(schema)
             .csv("train-balanced-sarc.csv").as[Comment]
             .filter( c => c.comment != null && c.comment != "")
-            //.map( c => helpers.include_subreddit(c) )
+            //.map( c => helpers.text_clean(c) )
 
         commentsDF.printSchema()
         //commentsDF.show()
@@ -31,7 +31,8 @@ object entry_point {
         val trainDF = dividedDatasets(0).cache()
         val testDF = dividedDatasets(1).cache()
 
-
+        // Some Statistics
+        helpers.countSarcastics(trainDF)
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
