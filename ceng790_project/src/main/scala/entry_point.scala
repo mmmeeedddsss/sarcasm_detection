@@ -11,7 +11,8 @@ object entry_point {
 
         val spark = SparkSession.builder.appName("Spark SQL").config("spark.master", "local[*]").getOrCreate()
         val sc = spark.sparkContext
-        sc.setLogLevel("ERROR")
+        sc.setLogLevel("WARN")
+
         val sqlContext = spark.sqlContext
         import sqlContext.implicits._
         val schema = ScalaReflection.schemaFor[Comment].dataType.asInstanceOf[StructType]
@@ -20,11 +21,11 @@ object entry_point {
             .option("delimiter", "\t")
             .schema(schema)
             .csv("train-balanced-sarc.csv").as[Comment]
-            .filter( c => c.comment != null && c.comment != "" )
-            .map( c => helpers.text_clean(c) )
+            .filter( c => c.comment != null && c.comment != "")
+            //.map( c => helpers.include_subreddit(c) )
 
         commentsDF.printSchema()
-        commentsDF.show()
+        //commentsDF.show()
 
         val dividedDatasets = commentsDF.randomSplit( Array(0.8, 0.2), seed = 1234 )
         val trainDF = dividedDatasets(0).cache()
@@ -34,10 +35,11 @@ object entry_point {
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
-            LogicticRegression.fit(trainDF, trainValidationSplitRatio)
-            //word2vec.fit(trainDF, trainValidationSplitRatio),
+            //LogicticRegression.fit(trainDF, trainValidationSplitRatio)
+            //word2vec.fit(trainDF, trainValidationSplitRatio)
             //NaiveBayes.fit(trainDF, trainValidationSplitRatio),
-            //LinearSVC.fit(trainDF, trainValidationSplitRatio)
+            //LinearSVC.fit(trainDF, trainValidationSplitRatio),
+            RandomForest.fit(trainDF, trainValidationSplitRatio)
         )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here
