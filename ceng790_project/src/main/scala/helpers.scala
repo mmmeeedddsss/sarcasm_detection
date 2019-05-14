@@ -20,6 +20,11 @@ object helpers {
             c.ups, c.downs, c.date, c.created_utc, c.parent_comment)
     }
 
+    def includeParentComment(c : Comment) : Comment = {
+        Comment(c.label, c.comment + c.parent_comment, c.author, c.subreddit, c.score,
+            c.ups, c.downs, c.date, c.created_utc, c.parent_comment)
+    }
+
     def includeAuthor(c : Comment) : Comment = {
         Comment(c.label, c.comment + c.author, c.author, c.subreddit, c.score,
             c.ups, c.downs, c.date, c.created_utc, c.parent_comment)
