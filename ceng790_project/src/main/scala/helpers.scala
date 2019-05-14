@@ -6,8 +6,11 @@ object helpers {
         //REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
         //BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
         val cleanedComment = c.comment
-            .replaceAll("[/(){}\\[\\]\\|@,;!]","")
-            .replaceAll("[0-9]", "")
+            .replaceAll("[/(){}\\[\\]\\|@,;!]"," ")
+            .replaceAll("[^a-zA-Z _]", "")
+            .toLowerCase
+                .trim
+            .replaceAll("( {1,})", " ")
         Comment( c.label, cleanedComment, c.author, c.subreddit, c.score,
             c.ups, c.downs, c.date, c.created_utc, c.parent_comment )
     }
@@ -32,11 +35,12 @@ object helpers {
         val count = comments.count()
         val sarcastics = comments.filter(c => c.label == 1).count()
 
-        comments.filter(c => c.label == 1).show(100, false)
+        comments.filter(c => c.label == 0).show(75, false)
+        comments.filter(c => c.label == 1).show(75, false)
 
         countHelper(count, sarcastics)
 
-        val subreddits = comments.groupBy("subreddit")
+        //val subreddits = comments.groupBy("subreddit")
 
     }
 }

@@ -21,8 +21,9 @@ object entry_point {
             .option("delimiter", "\t")
             .schema(schema)
             .csv("train-balanced-sarc.csv").as[Comment]
-            .filter( c => c.comment != null && c.comment != "")
+            .filter( _.comment != null )
             //.map( c => helpers.text_clean(c) )
+            .filter( _.comment.replaceAll(" ", "") != "")
 
         commentsDF.printSchema()
         //commentsDF.show()
@@ -40,7 +41,8 @@ object entry_point {
             //word2vec.fit(trainDF, trainValidationSplitRatio)
             //NaiveBayes.fit(trainDF, trainValidationSplitRatio),
             //LinearSVC.fit(trainDF, trainValidationSplitRatio),
-            RandomForest.fit(trainDF, trainValidationSplitRatio)
+            //RandomForest.fit(trainDF, trainValidationSplitRatio),
+            NGramLogRegression.fit(trainDF, trainValidationSplitRatio)
         )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here

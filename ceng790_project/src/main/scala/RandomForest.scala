@@ -19,27 +19,34 @@ object RandomForest extends ml_algorithm {
 
         val tokenizer = new Tokenizer()
             .setInputCol("comment")
-            .setOutputCol("stopWords")
+            .setOutputCol("words")
 
-        val remover = new StopWordsRemover()
-          .setInputCol("stopWords")
-          .setOutputCol("words")
+        val swr = new StopWordsRemover()
+            .setInputCol("words")
+            .setOutputCol("cleaned_words")
 
-        val word2vec = new Word2Vec()
-              .setInputCol(remover.getOutputCol)
-              .setOutputCol("features")
+        val vectorizer = new HashingTF()
+            .setInputCol("cleaned_words")
+            .setOutputCol("vectorized_comment")
+
+        val idf = new IDF()
+            //.setMinDocFreq(params.minDocFreq)
+            .setInputCol(vectorizer.getOutputCol)
+            .setOutputCol("features")
 
         val rnd = new RandomForestClassifier()
+            .setSeed(1234)
+            .setFeatureSubsetStrategy("auto")
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, remover, word2vec, rnd))
+            .setStages(Array(tokenizer, swr, vectorizer, idf, rnd))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-          .addGrid(rnd.maxBins, Array(28, 40))
-          .addGrid(rnd.maxDepth, Array(5, 12))
-          .addGrid(rnd.numTrees, Array(100))
+            .addGrid(rnd.maxBins, Array(25, 28 ))
+            .addGrid(rnd.maxDepth, Array(4, 8))
+            .addGrid(rnd.impurity, Array("gini"))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
