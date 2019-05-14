@@ -31,7 +31,6 @@ object LinearSVC extends ml_algorithm {
 
 
         val lr = new LinearSVC()
-            .setMaxIter(15)
         //.setRegParam(0.3)
         //.setElasticNetParam(0.8)
 
@@ -41,7 +40,7 @@ object LinearSVC extends ml_algorithm {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            //.addGrid(lr.elasticNetParam, Array(0.6))
+            .addGrid(lr.regParam, Array(0.01, 0.1, 1))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

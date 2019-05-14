@@ -16,41 +16,33 @@ object entry_point {
         val sqlContext = spark.sqlContext
         import sqlContext.implicits._
         val schema = ScalaReflection.schemaFor[Comment].dataType.asInstanceOf[StructType]
-        val trainCommentsDF = spark.read
+        val commentsDF = spark.read
             .option("header", false)
             .option("delimiter", "\t")
             .schema(schema)
             .csv("train-balanced-sarc.csv").as[Comment]
-            .filter( c => c.comment != null && c.comment != "")
+            .filter( _.comment != null )
             //.map( c => helpers.text_clean(c) )
+            .filter( _.comment.replaceAll(" ", "") != "")
 
-        val testCommentsDF = spark.read
-            .option("header", false)
-            .option("delimiter", "\t")
-            .schema(schema)
-            .csv("test-balanced.csv").as[Comment]
-            .filter( c => c.comment != null && c.comment != "")
-
-        //trainCommentsDF.printSchema()
+        commentsDF.printSchema()
         //commentsDF.show()
-/*
+
         val dividedDatasets = commentsDF.randomSplit( Array(0.8, 0.2), seed = 1234 )
         val trainDF = dividedDatasets(0).cache()
         val testDF = dividedDatasets(1).cache()
 
         // Some Statistics
-        helpers.countSarcastics(trainCommentsDF)
-*/
-        val trainDF = trainCommentsDF
-        val testDF = testCommentsDF
+        helpers.countSarcastics(trainDF)
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
             //LogicticRegression.fit(trainDF, trainValidationSplitRatio)
             //word2vec.fit(trainDF, trainValidationSplitRatio)
-            NaiveBayes.fit(trainDF, trainValidationSplitRatio),
-            LinearSVC.fit(trainDF, trainValidationSplitRatio),
-            //RandomForest.fit(trainDF, trainValidationSplitRatio)
+            //NaiveBayes.fit(trainDF, trainValidationSplitRatio),
+            //LinearSVC.fit(trainDF, trainValidationSplitRatio),
+            //RandomForest.fit(trainDF, trainValidationSplitRatio),
+            NGramLogRegression.fit(trainDF, trainValidationSplitRatio)
         )
 
         // Best algorithm on the validation set is selected and its score on test set is calculated in here

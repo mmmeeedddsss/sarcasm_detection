@@ -5,11 +5,11 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.Dataset
 
-object LogicticRegression extends ml_algorithm {
+object NGramLogRegression extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
-        println("TF-IDF")
+        println("NGram LR")
 
         val indexer = new StringIndexer()
             .setInputCol("label")
@@ -20,29 +20,28 @@ object LogicticRegression extends ml_algorithm {
             .setInputCol("comment")
             .setOutputCol("words")
 
-        val vectorizer = new HashingTF()
+        val ngram = new NGram()
             .setInputCol("words")
-            .setOutputCol("vectorized_comment")
+            .setOutputCol("ngrams")
 
-        val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
-            .setInputCol(vectorizer.getOutputCol)
-            .setOutputCol("features")
-
+        val countVectorizer = new CountVectorizer()
+            .setInputCol("ngrams")
+            .setOutputCol("ngram_vectors")
 
         val lr = new LogisticRegression()
             .setMaxIter(20)
             .setLabelCol("indexedLabel")
-            .setFeaturesCol("features")
+            .setFeaturesCol("ngram_vectors")
             //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, vectorizer, idf, lr))
+            .setStages(Array(indexer, tokenizer, ngram, countVectorizer, lr))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.regParam, Array(0.001, 0.01, 0.1, 1))
+            .addGrid(lr.regParam, Array(0.1, 0.01))
+            .addGrid(ngram.n, Array(2))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
@@ -57,6 +56,6 @@ object LogicticRegression extends ml_algorithm {
         model.getEstimatorParamMaps
             .zip(model.validationMetrics).foreach( t => println(t) )
 
-        (model.validationMetrics.max, "tf-idf", model)
+        (model.validationMetrics.max, "NGram-LR", model)
     }
 }
