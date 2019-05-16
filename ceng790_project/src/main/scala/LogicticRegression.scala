@@ -42,7 +42,9 @@ object LogicticRegression extends ml_algorithm {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.regParam, Array(0.001, 0.01, 0.1, 1))
+            .addGrid(lr.regParam, Array(0.01))
+            .addGrid(lr.elasticNetParam, Array(0.1))
+            .addGrid(lr.maxIter, Array(20))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

@@ -37,11 +37,11 @@ object entry_point {
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
-            //LogicticRegression.fit(trainDF, trainValidationSplitRatio)
-            //word2vec.fit(trainDF, trainValidationSplitRatio)
-            //NaiveBayes.fit(trainDF, trainValidationSplitRatio),
-            //LinearSVC.fit(trainDF, trainValidationSplitRatio),
-            //RandomForest.fit(trainDF, trainValidationSplitRatio),
+            LogicticRegression.fit(trainDF, trainValidationSplitRatio),
+            word2vec.fit(trainDF, trainValidationSplitRatio),
+            NaiveBayes.fit(trainDF, trainValidationSplitRatio),
+            LinearSVC.fit(trainDF, trainValidationSplitRatio),
+            RandomForest.fit(trainDF, trainValidationSplitRatio),
             NGramLogRegression.fit(trainDF, trainValidationSplitRatio)
         )
 
@@ -51,5 +51,11 @@ object entry_point {
 
         val evaluator = new BinaryClassificationEvaluator()
         println("Best model %s on test data : %f".format(best_model._2, evaluator.evaluate(predictionsDF)))
+
+        while(false){
+            val text = scala.io.StdIn.readLine()
+            val userIDataSet = Seq( Comment(0,text,"","",null,null,null,"","","") ).toDS()
+            best_model._3.bestModel.transform(userIDataSet).show()
+        }
     }
 }

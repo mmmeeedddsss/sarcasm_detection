@@ -30,9 +30,10 @@ object RandomForest extends ml_algorithm {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(rnd.maxBins, Array(25, 28 ))
-            .addGrid(rnd.maxDepth, Array(4, 8))
+            .addGrid(rnd.maxBins, Array(25))
+            .addGrid(rnd.maxDepth, Array(20))
             .addGrid(rnd.impurity, Array("gini"))
+            .addGrid(rnd.numTrees, Array(30))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
