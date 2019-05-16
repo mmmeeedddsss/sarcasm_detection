@@ -29,12 +29,10 @@ object LogicticRegression extends ml_algorithm {
             .setInputCol(vectorizer.getOutputCol)
             .setOutputCol("features")
 
-
         val lr = new LogisticRegression()
             .setMaxIter(20)
             .setLabelCol("indexedLabel")
             .setFeaturesCol("features")
-            //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
             .setStages(Array(indexer, tokenizer, vectorizer, idf, lr))
@@ -43,8 +41,9 @@ object LogicticRegression extends ml_algorithm {
 
         val paramGrid = new ParamGridBuilder()
             .addGrid(lr.regParam, Array(0.01))
-            .addGrid(lr.elasticNetParam, Array(0.1))
-            .addGrid(lr.maxIter, Array(20))
+            .addGrid(lr.elasticNetParam, Array(0.07))
+            .addGrid(lr.maxIter, Array(25))
+            .addGrid(vectorizer.numFeatures, Array(524288))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

@@ -9,7 +9,7 @@ object NaiveBayes extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
-        println("Naive-Bayes with TF_IDF")
+        println("Naive-Bayes with CV")
 
         val indexer = new StringIndexer()
             .setInputCol("label")
@@ -20,27 +20,19 @@ object NaiveBayes extends ml_algorithm {
             .setInputCol("comment")
             .setOutputCol("words")
 
-        val vectorizer = new HashingTF()
+        val vectorizer = new CountVectorizer()
             .setInputCol(tokenizer.getOutputCol)
-            .setOutputCol("vectorized_comment")
-
-        val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
-            .setInputCol(vectorizer.getOutputCol)
             .setOutputCol("features")
 
         val nb = new NaiveBayes()
             .setFeaturesCol("features")
-        //.setRegParam(0.3)
-        //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, vectorizer, idf, nb))
+            .setStages(Array(indexer, tokenizer, vectorizer, nb))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            //.addGrid(nb., Array(0.6))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

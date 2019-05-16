@@ -20,27 +20,21 @@ object LinearSVC extends ml_algorithm {
             .setInputCol("comment")
             .setOutputCol("words")
 
-        val vectorizer = new HashingTF()
+        val word2vec = new Word2Vec()
             .setInputCol(tokenizer.getOutputCol)
-            .setOutputCol("vectorized_comment")
-
-        val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
-            .setInputCol(vectorizer.getOutputCol)
             .setOutputCol("features")
-
 
         val lr = new LinearSVC()
         //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, vectorizer, idf, lr))
+            .setStages(Array(indexer, tokenizer, word2vec, lr))
 
         val evaluator = new BinaryClassificationEvaluator()
 
-        val paramGrid = new RandomGridBuilder(5)
+        val paramGrid = new RandomGridBuilder(1)
             .addDistr(lr.regParam, Array(0.01))
-            .addDistr(lr.regParam, Array(0.01))
+            .addDistr(word2vec.windowSize, Array(3,4,6))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

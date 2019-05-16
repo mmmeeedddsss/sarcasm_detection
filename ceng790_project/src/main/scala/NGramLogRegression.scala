@@ -24,24 +24,31 @@ object NGramLogRegression extends ml_algorithm {
             .setInputCol("words")
             .setOutputCol("ngrams")
 
-        val countVectorizer = new CountVectorizer()
+        val vectorizer = new HashingTF()
             .setInputCol("ngrams")
-            .setOutputCol("ngram_vectors")
+            .setOutputCol("vectorized_comment")
+
+        val idf = new IDF()
+            //.setMinDocFreq(params.minDocFreq)
+            .setInputCol(vectorizer.getOutputCol)
+            .setOutputCol("features")
 
         val lr = new LogisticRegression()
             .setMaxIter(20)
             .setLabelCol("indexedLabel")
-            .setFeaturesCol("ngram_vectors")
+            .setFeaturesCol("features")
             //.setElasticNetParam(0.8)
 
         val mlPipeline = new Pipeline()
-            .setStages(Array(indexer, tokenizer, ngram, countVectorizer, lr))
+            .setStages(Array(indexer, tokenizer, ngram, vectorizer, idf, lr))
 
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid(lr.regParam, Array(0.1, 0.01))
-            .addGrid(ngram.n, Array(2))
+            .addGrid(lr.regParam, Array(0.01))
+            .addGrid(lr.elasticNetParam, Array(0.08))
+            .addGrid(lr.maxIter, Array(20, 25))
+            .addGrid(ngram.n, Array(2, 3))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()

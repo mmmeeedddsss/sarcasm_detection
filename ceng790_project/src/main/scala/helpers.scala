@@ -6,11 +6,13 @@ object helpers {
         //REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
         //BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
         val cleanedComment = c.comment
-            .replaceAll("[/(){}\\[\\]\\|@,;!]"," ")
+            .toLowerCase
+            .trim
+            /*.replaceAll("[/(){}\\[\\]\\|@,;!]"," ")
             .replaceAll("[^a-zA-Z _]", "")
             .toLowerCase
                 .trim
-            .replaceAll("( {1,})", " ")
+            .replaceAll("( {1,})", " ")*/
         Comment( c.label, cleanedComment, c.author, c.subreddit, c.score,
             c.ups, c.downs, c.date, c.created_utc, c.parent_comment )
     }

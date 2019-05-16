@@ -25,7 +25,6 @@ object word2vec extends ml_algorithm {
             .setOutputCol("features")
 
         val lr = new LogisticRegression()
-            .setMaxIter(10)
 
         val mlPipeline = new Pipeline()
             .setStages(Array(indexer, tokenizer, word2vec, lr))
@@ -33,7 +32,10 @@ object word2vec extends ml_algorithm {
         val evaluator = new BinaryClassificationEvaluator()
 
         val paramGrid = new ParamGridBuilder()
-            .addGrid( word2vec.windowSize, Array(5) )
+            .addGrid( word2vec.windowSize, Array(2,3,4) )
+            .addGrid(lr.regParam, Array(0.01))
+            .addGrid(lr.elasticNetParam, Array(0.08))
+            .addGrid(lr.maxIter, Array(20))
             .build()
 
         val trainValidationSplit = new TrainValidationSplit()
