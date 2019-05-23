@@ -9,20 +9,7 @@ object word2vec extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
-        println("Word2Vec")
-
-        val indexer = new StringIndexer()
-            .setInputCol("label")
-            .setOutputCol("indexedLabel")
-            .fit(trainDF)
-
-        val tokenizer = new Tokenizer()
-            .setInputCol("comment")
-            .setOutputCol("words")
-
-        val word2vec = new Word2Vec()
-            .setInputCol(tokenizer.getOutputCol)
-            .setOutputCol("features")
+        println("Logistic Regression with Word2Vec")
 
         val lr = new LogisticRegression()
 
@@ -42,7 +29,7 @@ object word2vec extends ml_algorithm {
             .setEstimator(mlPipeline)
             .setEvaluator(evaluator)
             .setEstimatorParamMaps(paramGrid)
-            .setTrainRatio(trainValidationRatio)
+            //.setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
         println( "Best score on validation set " + model.validationMetrics.max )

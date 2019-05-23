@@ -11,19 +11,6 @@ object NaiveBayes extends ml_algorithm {
 
         println("Naive-Bayes with CV")
 
-        val indexer = new StringIndexer()
-            .setInputCol("label")
-            .setOutputCol("indexedLabel")
-            .fit(trainDF)
-
-        val tokenizer = new Tokenizer()
-            .setInputCol("comment")
-            .setOutputCol("words")
-
-        val vectorizer = new CountVectorizer()
-            .setInputCol(tokenizer.getOutputCol)
-            .setOutputCol("features")
-
         val nb = new NaiveBayes()
             .setFeaturesCol("features")
 
@@ -39,7 +26,7 @@ object NaiveBayes extends ml_algorithm {
             .setEstimator(mlPipeline)
             .setEvaluator(evaluator)
             .setEstimatorParamMaps(paramGrid)
-            .setTrainRatio(trainValidationRatio)
+            //.setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
         println( "Best score on validation set " + model.validationMetrics.max )

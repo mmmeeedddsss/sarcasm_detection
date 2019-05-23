@@ -39,7 +39,7 @@ object entry_point {
         val testDF = dividedDatasets(1).cache()
 
         // Some Statistics
-        helpers.countSarcastics(trainDF)
+        //helpers.countSarcastics(trainDF)
 
         // More algortihms will be added here
         val trained_model_tuples = Array(
@@ -58,7 +58,7 @@ object entry_point {
         val evaluator = new BinaryClassificationEvaluator()
         println("Best model %s on test data : %f".format(best_model._2, evaluator.evaluate(predictionsDF)))
 
-        if(true){
+        if(false){
             import org.apache.spark.sql.functions._
             import org.apache.spark.ml.linalg.Vector
             val to_array1 = udf((v: Vector) => v.toDense.values)

@@ -11,15 +11,6 @@ object NGramLogRegression extends ml_algorithm {
 
         println("NGram LR")
 
-        val indexer = new StringIndexer()
-            .setInputCol("label")
-            .setOutputCol("indexedLabel")
-            .fit(trainDF)
-
-        val tokenizer = new Tokenizer()
-            .setInputCol("comment")
-            .setOutputCol("words")
-
         val ngram = new NGram()
             .setInputCol("words")
             .setOutputCol("ngrams")
@@ -29,7 +20,6 @@ object NGramLogRegression extends ml_algorithm {
             .setOutputCol("vectorized_comment")
 
         val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
             .setInputCol(vectorizer.getOutputCol)
             .setOutputCol("features")
 

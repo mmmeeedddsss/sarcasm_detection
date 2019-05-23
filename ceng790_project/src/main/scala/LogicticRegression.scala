@@ -1,7 +1,6 @@
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
-import org.apache.spark.ml.feature._
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.Dataset
 
@@ -9,28 +8,9 @@ object LogicticRegression extends ml_algorithm {
 
     def fit(trainDF : Dataset[Comment], trainValidationRatio: Double): (Double, String, TrainValidationSplitModel) = {
 
-        println("TF-IDF")
-
-        val indexer = new StringIndexer()
-            .setInputCol("label")
-            .setOutputCol("indexedLabel")
-            .fit(trainDF)
-
-        val tokenizer = new Tokenizer()
-            .setInputCol("comment")
-            .setOutputCol("words")
-
-        val vectorizer = new HashingTF()
-            .setInputCol("words")
-            .setOutputCol("vectorized_comment")
-
-        val idf = new IDF()
-            //.setMinDocFreq(params.minDocFreq)
-            .setInputCol(vectorizer.getOutputCol)
-            .setOutputCol("features")
+        println("Logistic Regression with TF-IDF")
 
         val lr = new LogisticRegression()
-            .setMaxIter(20)
             .setLabelCol("indexedLabel")
             .setFeaturesCol("features")
 

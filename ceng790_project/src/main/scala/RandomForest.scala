@@ -12,14 +12,6 @@ object RandomForest extends ml_algorithm {
 
         println("Random Forest")
 
-        val tokenizer = new Tokenizer()
-            .setInputCol("comment")
-            .setOutputCol("words")
-
-        val word2vec = new Word2Vec()
-          .setInputCol(tokenizer.getOutputCol)
-          .setOutputCol("features")
-
         val rnd = new RandomForestClassifier()
             .setSeed(1234)
             .setFeatureSubsetStrategy("auto")
@@ -31,8 +23,8 @@ object RandomForest extends ml_algorithm {
 
         val paramGrid = new ParamGridBuilder()
             .addGrid(rnd.maxBins, Array(25))
-            .addGrid(rnd.maxDepth, Array(20))
-            .addGrid(rnd.impurity, Array("gini"))
+            .addGrid(rnd.maxDepth, Array(10))
+            .addGrid(rnd.impurity, Array("entropy"))
             .addGrid(rnd.numTrees, Array(30))
             .build()
 
@@ -40,7 +32,6 @@ object RandomForest extends ml_algorithm {
             .setEstimator(mlPipeline)
             .setEvaluator(evaluator)
             .setEstimatorParamMaps(paramGrid)
-            //.setTrainRatio(trainValidationRatio)
 
         val model = trainValidationSplit.fit(trainDF)
 
